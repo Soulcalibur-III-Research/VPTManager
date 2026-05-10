@@ -209,7 +209,7 @@ public class MainForm : Form
 				list.Add(byte.MaxValue);
 			}
 		}
-		if (true)
+		if (false)
 		{
 			List<Color> list3 = PS2.Swizzle8(marshalBitmap);
 			for (int l = 0; l < list3.Count; l++)
@@ -257,14 +257,12 @@ public class MainForm : Form
 		}
 		else
 		{
-			for (int num3 = 0; num3 < marshalBitmap.Height; num3++)
-			{
-				for (int num4 = 0; num4 < marshalBitmap.Width; num4++)
-				{
-					list2.Add(PS2.CalcIndex((byte)dictionary[marshalBitmap.GetPixel(num4, num3)]));
-				}
-			}
-			PS2.PS2Image value2 = OpenVXT.Images[index];
+            List<Color> list3 = PS2.Swizzle8(marshalBitmap);
+            for (int l = 0; l < list3.Count; l++)
+            {
+                list2.Add(PS2.CalcIndex((byte)dictionary[list3[l]]));
+            }
+            PS2.PS2Image value2 = OpenVXT.Images[index];
 			value2.Data = list2.ToArray();
 			value2.Palette = list.ToArray();
 			OpenVXT.Images[index] = value2;
@@ -278,32 +276,33 @@ public class MainForm : Form
                     binaryWriter.BaseStream.Position = vXTInfo.ColorOffset;
                     binaryWriter.Write(value2.Palette);
             }
-            for (int num5 = 0; num5 < OpenVXT.Images.Count; num5++)
-			{
-				try
-				{
-					MarshalBitmap item = OpenVXT.Parse8(num5);
-                    if (item != null)
+            for (int m = 0; m < OpenVXT.Images.Count; m++)
+            {
+                try
+                {
+                    MarshalBitmap marshalBitmap2 = OpenVXT.Parse8(m);
+                    if (marshalBitmap2 == null)
                     {
-                        Images.Add(item);
-                    }
-                    else
-                    {
-                        Rectangle rect = new Rectangle(0, 0, 1, 1);
-                        marshalBitmap = new MarshalBitmap(1, 1);
+                        marshalBitmap2 = new MarshalBitmap(1, 1);
 
                         Images.Add(marshalBitmap);
+                        continue;
                     }
-				}
-				catch (Exception)
-				{
-                    Rectangle rect = new Rectangle(0, 0, 1, 1);
-                        marshalBitmap = new MarshalBitmap(1, 1);
-
-                        Images.Add(marshalBitmap);
-				}
-			}
-		}
+                    List<Color> list4 = new List<Color>();
+                    for (int n = 0; n < marshalBitmap2.Height; n++)
+                    {
+                        for (int num2 = 0; num2 < marshalBitmap2.Width; num2++)
+                        {
+                            list4.Add(marshalBitmap2.GetPixel(num2, n));
+                        }
+                    }
+                    Images.Add(PS2.Unswizzle8(new Size(marshalBitmap2.Width, marshalBitmap2.Height), list4));
+                }
+                catch (Exception)
+                {
+                }
+            }
+        }
 		IconBox.Image = Images[GetIndex(texture_list.SelectedNode)].Bitmap;
 	}
 
